@@ -26,13 +26,14 @@ from KEN.metric.KEN import KEN_Evaluator
 # Core object for calculate KEN score and retrieve image modes
 evaluator = KEN_Evaluator(logger_path: str, # Path to save log file
                           batchsize: int, # Batch size
-                          sigma: int, # Bandwidth parameter in RBF kernel
+                          kernel: str, # Kernel
+                          sigma: int, # Bandwidth parameters in RBF kernel
                           eta: int, # Novelty threshold
                           num_samples: int, # Sampling number for EACH distribution
                           result_name: str) # Unique name for saving results
 
 # Select feature extractor
-evaluator.set_feature_extractor(name: str = 'dinov2', # feature extractor ['inception', 'dinov2', 'clip']
+evaluator.set_feature_extractor(name: str = 'sentence-transformer', # feature extractor ['sentence-transformer', 'openai']
                                 save_path: str | None = './save') # Path to save calculated features for reuse
 
 # Calculate KEN score and visualize novel modes of test_dataset w.r.t. ref_dataset
