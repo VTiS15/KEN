@@ -4,6 +4,8 @@ This repository provides an official implementation of the mode-based novelty KE
 
 ![top novel mode of AFHQ w.r.t. ImageNet dogs](./media/Intro_v2.001.png)
 
+Note: this works with text data only, unlike the examples below.
+
 ## Quick Access
 [Code Descriptions](#quick-start) <br>
 [Inception-V3 Example](#example-1) <br>
@@ -47,8 +49,8 @@ evaluator.compute_KEN_with_datasets(test_dataset: torch.utils.data.Dataset,
 ### Save Extracted Features and Indexes for Further Use
 In some cases, we may save the extracted features to reduce repeating computation (e.g. tuning bandwidth parameter, novelty threshold). We may specify the folder to save and load features:
 ```python
-evaluator.set_feature_extractor(name = 'dinov2', # feature extractor ['inception', 'dinov2', 'clip']
-                                save_path = './save') # Path to save calculated features for reuse
+evaluator.set_feature_extractor(name: str = 'sentence-transformer', # feature extractor ['sentence-transformer', 'openai']
+                                save_path: str | None = './save') # Path to save calculated features for reuse
 ```
 In this example, the evaluator will first check whether './save/dinov2/[result_name]_[other_information].pt' exists. If not, the evaluator will extract features and their indexes in the dataset, and save to this path.
 
