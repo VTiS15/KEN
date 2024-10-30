@@ -37,6 +37,7 @@ class KEN_Evaluator:
     def __init__(
         self,
         logger_path: str,
+        kernel: str,
         sigma: float,
         eta: float,
         result_name: str,
@@ -44,6 +45,7 @@ class KEN_Evaluator:
         batchsize: int = 128,
     ):
         self.logger_path = logger_path
+        self.kernel = kernel
         self.sigma = sigma
         self.eta = eta
         self.num_samples = num_samples
@@ -110,6 +112,7 @@ class KEN_Evaluator:
         args = Namespace(
             num_samples=self.num_samples,
             batchsize=self.batchsize,
+            kernel=self.kernel,
             sigma=self.sigma,
             eta=self.eta,
             logger=self.running_logger,
@@ -121,6 +124,7 @@ class KEN_Evaluator:
             num_txt_per_mode=50,
         )
 
+        self.running_logger.info(f"Kernel: {args.kernel}")
         self.running_logger.info(
             "Num_samples_per_distribution: {}, Sigma: {}, Eta: {}".format(
                 args.num_samples, args.sigma, args.eta
