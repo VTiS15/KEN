@@ -5,6 +5,7 @@ if __name__ == "__main__":
     KEN = KEN_Evaluator(
         logger_path="./logs",
         batchsize=128,
+        kernel="cosine",
         sigma=10,
         eta=1,
         num_samples=1000,

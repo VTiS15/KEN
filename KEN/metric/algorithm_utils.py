@@ -2,10 +2,11 @@ import torch
 import numpy as np
 from torch.linalg import eigvalsh
 from torch.distributions import Categorical
+from torch.nn.functional import cosine_similarity
 import os
 
 
-def normalized_gaussian_kernel(x, y, sigma, batchsize):
+def normalized_kernel(x, y, ktype, batchsize, **kwargs):
     """
     calculate the kernel matrix, the shape of x and y should be equal except for the batch dimension
 
@@ -28,15 +29,23 @@ def normalized_gaussian_kernel(x, y, sigma, batchsize):
     total_res = torch.zeros((x.shape[0], 0), device=x.device)
     for batchidx in range(batch_num):
         y_slice = y[batchidx * batchsize : min((batchidx + 1) * batchsize, y.shape[0])]
-        res = torch.norm(x.unsqueeze(1) - y_slice, dim=2, p=2).pow(2)
-        res = torch.exp((-1 / (2 * sigma * sigma)) * res)
+
+        if ktype.lower() == "gaussian":
+            if "sigma" in kwargs:
+                res = torch.norm(x.unsqueeze(1) - y_slice, dim=2, p=2).pow(2)
+                res = torch.exp((-1 / (2 * kwargs.get("sigma") ** 2)) * res)
+            else:
+                raise ValueError('sigma is required when ktype == "gaussian"')
+        elif ktype.lower() == "cosine":
+            res = cosine_similarity(x.unsqueeze(1), y_slice, dim=2)
+        else:
+            raise ValueError('ktype must be either "gaussian" or "cosine"')
+
         total_res = torch.hstack([total_res, res])
 
         del res, y_slice
 
-    total_res = total_res / np.sqrt(x.shape[0] * y.shape[0])
-
-    return total_res
+    return total_res / np.sqrt(x.shape[0] * y.shape[0])
 
 
 def print_novelty_metrics(eigenvalues, args):
@@ -75,9 +84,9 @@ def build_matrix(x, y, args):
     which has the same positive eigenvalues of conditional kernel covariance matrix
     """
 
-    kxx = normalized_gaussian_kernel(x, x, args.sigma, args.batchsize)
-    kyy = normalized_gaussian_kernel(y, y, args.sigma, args.batchsize)
-    kxy = normalized_gaussian_kernel(x, y, args.sigma, args.batchsize)
+    kxx = normalized_kernel(x, x, args.kernel, args.batchsize, sigma=args.sigma)
+    kyy = normalized_kernel(y, y, args.kernel, args.batchsize, sigma=args.sigma)
+    kxy = normalized_kernel(x, y, args.kernel, args.batchsize, sigma=args.sigma)
     kyx = kxy.T
 
     matrix_first_row = torch.hstack([kxx, kxy * np.sqrt(args.eta)])
@@ -93,9 +102,9 @@ def build_matrix_cholesky(x, y, args):
     which has the same positive eigenvalues of conditional kernel covariance matrix
     """
 
-    kxx = normalized_gaussian_kernel(x, x, args.sigma, args.batchsize)
-    kyy = normalized_gaussian_kernel(y, y, args.sigma, args.batchsize)
-    kxy = normalized_gaussian_kernel(x, y, args.sigma, args.batchsize)
+    kxx = normalized_kernel(x, x, args.kernel, args.batchsize, sigma=args.sigma)
+    kyy = normalized_kernel(y, y, args.kernel, args.batchsize, sigma=args.sigma)
+    kxy = normalized_kernel(x, y, args.kernel, args.batchsize, sigma=args.sigma)
     kyx = kxy.T
 
     matrix_first_row = torch.hstack([kxx, kxy * np.sqrt(args.eta)])
