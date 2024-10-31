@@ -52,8 +52,8 @@ class KEN_Evaluator:
         self.batchsize = batchsize
 
         self.current_time = time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
-        self.result_name = "{}_num_{}_sigma_{}_eta_{}".format(
-            result_name, num_samples, sigma, eta
+        self.result_name = "{}_num_{}_{}_sigma_{}_eta_{}".format(
+            result_name, num_samples, kernel, sigma, eta
         )
         self.save_feats_name = "{}_num_{}".format(result_name, num_samples)
 
