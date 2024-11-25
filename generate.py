@@ -6,7 +6,7 @@ import torch
 from tqdm import tqdm
 from dotenv import load_dotenv
 
-from models import OpenAIModel, HuggingFaceModel
+from KEN.models import OpenAIModel, HuggingFaceModel
 
 load_dotenv()
 
