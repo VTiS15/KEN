@@ -6,6 +6,7 @@ __pycache__/
 *.log
 save/
 modes/
+plots/
 
 # C extensions
 *.so
