@@ -73,9 +73,11 @@ def print_novelty_metrics(eigenvalues, args):
         )
     )
     args.logger.info("Shannon Entropy: {:.4f}".format(entropy))
-    args.logger.info("KEN score: {:.4f}".format(entropy * sum_of_postive_eigenvalues))
 
-    return
+    score = entropy * sum_of_postive_eigenvalues
+    args.logger.info("KEN score: {:.4f}".format(score))
+
+    return score
 
 
 def build_matrix(x, y, args):
@@ -143,9 +145,6 @@ def visualize_mode_by_eigenvectors_in_both_sets(
     eigenvalues = eigenvalues.real
     eigenvectors = eigenvectors.real
 
-    if print_KEN:
-        print_novelty_metrics(eigenvalues, args)
-
     _, max_id = eigenvalues.topk(args.num_text_mode)
 
     now_time = args.current_time
@@ -203,6 +202,9 @@ def visualize_mode_by_eigenvectors_in_both_sets(
         with open(os.path.join(save_folder_name, "summary_ref.txt"), "w") as file:
             file.writelines(summary_ref)
 
+    if print_KEN:
+        print_novelty_metrics(eigenvalues, args)
+
 
 def visualize_mode_by_eigenvectors(x, y, dataset, idxs, args, print_KEN=True):
 
@@ -212,9 +214,6 @@ def visualize_mode_by_eigenvectors(x, y, dataset, idxs, args, print_KEN=True):
     eigenvalues, eigenvectors = torch.linalg.eig(fused_kernel_matrix)
     eigenvalues = eigenvalues.real
     eigenvectors = eigenvectors.real
-
-    if print_KEN:
-        print_novelty_metrics(eigenvalues, args)
 
     _, max_id = eigenvalues.topk(args.num_text_mode)
 
@@ -250,8 +249,11 @@ def visualize_mode_by_eigenvectors(x, y, dataset, idxs, args, print_KEN=True):
             if cnt_saved_txt >= args.num_txt_per_mode:
                 break
 
-        with open(os.path.join(save_folder_name, "summary.txt"), "w") as file:
+        with open(f"{save_folder_name}_summary.txt", "w") as file:
             file.writelines(summary)
+
+    if print_KEN:
+        return print_novelty_metrics(eigenvalues, args)
 
 
 def KEN_by_cholesky_decomposition(x, y, args):
@@ -289,9 +291,7 @@ def KEN_by_cholesky_decomposition(x, y, args):
         matrix_to_be_decomposed = U @ d_matrix @ U.T
         eigenvalues = eigvalsh(matrix_to_be_decomposed)
 
-        print_novelty_metrics(eigenvalues, args)
-
-    return
+    return print_novelty_metrics(eigenvalues, args)
 
 
 def KEN_by_eigendecomposition(x, y, args):
@@ -299,6 +299,5 @@ def KEN_by_eigendecomposition(x, y, args):
     args.logger.info("Use matrix eigen-decomposition.")
     eigenvalues = torch.linalg.eigvals(fused_matrix)
     eigenvalues = eigenvalues.real
-    print_novelty_metrics(eigenvalues, args)
 
-    return
+    return print_novelty_metrics(eigenvalues, args)

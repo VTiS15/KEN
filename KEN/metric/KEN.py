@@ -9,13 +9,13 @@ import logging
 import sys
 
 
-def get_logger(filepath="./logs/novelty.log"):
+def get_logger(name, filepath="./logs/novelty.log"):
     """
     Information Module:
         Save the program execution information to a log file and output to the terminal at the same time
     """
 
-    logger = logging.getLogger()
+    logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
     formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
 
@@ -66,10 +66,11 @@ class KEN_Evaluator:
 
     def init_running_logger(self):
         self.running_logger = get_logger(
+            self.current_time,
             join(
                 self.logger_path,
                 "run_{}_{}.log".format(self.result_name, self.current_time),
-            )
+            ),
         )
 
     def test(self):
@@ -81,7 +82,7 @@ class KEN_Evaluator:
         KEN_by_cholesky_decomposition(x, y, test_args)
 
     def set_feature_extractor(self, name: str, model: str, save_path=None):
-        if name.lower() == "sentence-transformer":
+        if name.lower() == "sentence-transformers":
             self.feature_extractor = SentenceTransformerExtractor(
                 model, save_path, logger=self.running_logger
             )
@@ -201,9 +202,9 @@ class KEN_Evaluator:
         else:
             self.running_logger.info("Now calculating KEN score")
             if cholesky_acceleration:
-                KEN_by_cholesky_decomposition(test_feats, ref_feats, args)
+                return KEN_by_cholesky_decomposition(test_feats, ref_feats, args)
             else:
-                KEN_by_eigendecomposition(test_feats, ref_feats, args)
+                return KEN_by_eigendecomposition(test_feats, ref_feats, args)
 
     def compute_KEN_with_features(
         self,
