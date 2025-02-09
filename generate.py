@@ -6,7 +6,13 @@ import torch
 from tqdm import tqdm
 from dotenv import load_dotenv
 
-from KEN.models import OpenAIModel, HuggingFaceModel
+from KEN.models import (
+    OpenAIModel,
+    HuggingFaceModel,
+    VertexAIModel,
+    AzureAIModel,
+    AzureOpenAIModel,
+)
 
 load_dotenv()
 
@@ -27,10 +33,12 @@ parser.add_argument(
 args = parser.parse_args()
 
 with open(args.filename, "w", newline="") as file:
-    model = HuggingFaceModel("meta-llama/Llama-3.2-3B-Instruct", torch.bfloat16)
-    writer = csv.writer(file)
+    model = HuggingFaceModel("Qwen/Qwen2.5-3B-Instruct")
+    # model = AzureAIModel(os.getenv("DEEPSEEK_ENDPOINT"), os.getenv("DEEPSEEK_API_KEY"))
+    # model = VertexAIModel("gemini-2.0-flash-001")
 
-    writer.writerow(["model", "topic", "essay"])
+    writer = csv.writer(file)
+    writer.writerow(["topic", "essay"])
     for idx in tqdm(range(args.n), desc="Generating essays"):
         writer.writerow(
             [
@@ -38,6 +46,6 @@ with open(args.filename, "w", newline="") as file:
                 model.generate(
                     f"Generate a one-paragraph essay about {args.topic}.",
                     top_p=0.95,
-                )[0]["generated_text"],
+                ),
             ]
         )
