@@ -10,7 +10,6 @@ from KEN.models import (
     OpenAIModel,
     HuggingFaceModel,
     VertexAIModel,
-    AzureAIModel,
     AzureOpenAIModel,
 )
 
@@ -32,18 +31,27 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-with open(args.filename, "w", newline="") as file:
-    model = HuggingFaceModel("Qwen/Qwen2.5-3B-Instruct")
-    # model = AzureAIModel(os.getenv("DEEPSEEK_ENDPOINT"), os.getenv("DEEPSEEK_API_KEY"))
-    # model = VertexAIModel("gemini-2.0-flash-001")
+# LLMs we use
+# llama = HuggingFaceModel("meta-llama/Llama-3.2-3B-Instruct", torch_dtype=torch.bfloat16)
+gpt = AzureOpenAIModel(
+    os.getenv("AZURE_OPENAI_ENDPOINT"), os.getenv("AZURE_OPENAI_API_KEY"), "gpt-4o"
+)
+# gemini = VertexAIModel("gemini-2.0-flash-001")
+# qwen = HuggingFaceModel("Qwen/Qwen2.5-3B-Instruct")
+# deepseek = OpenAIModel(
+#     os.getenv("OPENROUTER_API_KEY"),
+#     os.getenv("OPENROUTER_BASE_URL"),
+#     "deepseek/deepseek-chat",
+# )
 
+with open(args.filename, "w", newline="") as file:
     writer = csv.writer(file)
     writer.writerow(["topic", "essay"])
     for idx in tqdm(range(args.n), desc="Generating essays"):
         writer.writerow(
             [
                 args.topic,
-                model.generate(
+                gpt.generate(
                     f"Generate a one-paragraph essay about {args.topic}.",
                     top_p=0.95,
                 ),
