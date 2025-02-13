@@ -4,9 +4,9 @@ from KEN.datasets.TextDataset import TextDataset
 
 if __name__ == "__main__":
     num_samples = 1000
-    dataset1 = TextDataset("~/KEN-dataset/deepseek-v3_universe.csv")
-    dataset2 = TextDataset("~/KEN-dataset/qwen-2.5-3B_universe.csv")
-    model_id = "sentence-transformers/all-mpnet-base-v2"
+    test_llm = "deepseek-v3"
+    ref_llm = "qwen-2.5-3B"
+    embedding = "sentence-transformers/all-mpnet-base-v2"
 
     KEN = KEN_Evaluator(
         logger_path="./logs",
@@ -15,13 +15,16 @@ if __name__ == "__main__":
         sigma=1,
         eta=5,
         num_samples=num_samples,
-        result_name=f"deepseek-v3_qwen-2.5-3B_{model_id.replace("/", "_")}",
+        result_name=f"{test_llm}_{ref_llm}_{embedding.replace("/", "_")}",
     )
 
-    KEN.set_feature_extractor(*model_id.split("/"), save_path="./save")
+    test_dataset = TextDataset(f"datasets/{test_llm}_universe.csv")
+    ref_dataset = TextDataset(f"datasets/{ref_llm}_universe.csv")
+
+    KEN.set_feature_extractor(*embedding.split("/"), save_path="./save")
     KEN.compute_KEN_with_datasets(
-        dataset1,
-        dataset2,
+        test_dataset,
+        ref_dataset,
         retrieve_mode=True,
         retrieve_mode_from_both_sets=True,
     )
